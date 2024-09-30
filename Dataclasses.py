@@ -1,5 +1,15 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+"""
+    CMC: CoinMarketCal
+"""
 
 @dataclass
-class EventEntry:
-    pass
+class CMCEvent:
+    coin: str = ""
+    date: str = ""
+    title: str = ""
+    description: str = ""
+    coinChangeDollar: str = ""
+    coinChangePercent: str = ""
+    aiAnalysis: str = ""
