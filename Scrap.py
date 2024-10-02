@@ -2,9 +2,9 @@ from typing import Any
 from bs4 import BeautifulSoup
 from bs4.element import PageElement, ResultSet
 
-from Dataclasses import CMCEvent
+from Dataclasses import CMCEvent, CMCEventValidation
 
-import re, requests
+import os, re, requests
 
 class Scrap:
     def __init__(self):
@@ -16,6 +16,8 @@ class Scrap:
             'Cookie': 'device_view=full; _ga=GA1.1.786695681.1726145331; cf_clearance=jdaHqd5mPaaUK_PMgQ0h48wqF1Qi3MXU6bRpVSTCXm8-1727531865-1.2.1.1-rNLpshqx6X1AP04dHy9LJMFJ.53SJQFmK6DZ.LNFfoqvoOihy3fYJEBip_7CoNtFSBrl3CatJw1vUIo8JgM4MqUnZhagJKG4jm.XfnFSpvfeGp24t7V5g4TfpuMAXtlqMFr70bpmx83LTwSAFnfhR4THdZCphgv8oNid7pE5rGF_1c5ImZ9cK0HB17CyGCalnJEx0g2Zsc2EB4X5_PDa9qdDkuZyeJIIsYo9CmGW2x3MwsWQSlqUgvRXrSpTn50SedVCBmkHCCOqUlF.gNJ4M6ZWlfbsvTqIo5BHdhkdE7u7Hv5ZDamMZscd2ftEsmNj9e.6I7UUYWNI0SQfuifVoEa6iZ16UyCJk2hjiTFxdZQuRg2VsYDlOHfit2l7C7PeMOVbrPeQIpTvyYo1lnF2QSqUq._YGbg0wYeb.b6OFsGAIy5lQ3YJLeJijMJW1xNz; PHPSESSID=0tn5m1et2f8i3cbo1ie6l6e8vj; AWSALB=R3OW55qP/GXDVRRWhPbgU5BIG7BF+pHCMi9JEBr9epHTmIy/ekKWp8Rq0TpgJJv6o4s1mggpZanZKN+HhTFWtMoHx7EKMPTExsWBKr2PDH50KpF/53Tt1ESnOpSl; _ga_90JJS7QB1F=GS1.1.1727531860.6.1.1727531926.0.0.0',
             'Referer': 'https://coinmarketcal.com/en/?form%5Bdate_range%5D=26%2F09%2F2024+-+30%2F07%2F2027&form%5Bkeyword%5D=&form%5Bcoin%5D%5B%5D=top300&form%5Bsort_by%5D=&form%5Bsubmit%5D=',
         }
+        
+        self.imagesPath = 'images'
         
     def RetrieveEvents(self):
         response = requests.get(f"{self.baseUrl}/en/pastevents", headers = self.headers)
@@ -42,7 +44,7 @@ class Scrap:
                 if description := eventBody.find_next('p', class_="card__description"):
                     description = description.get_text(strip=True)
                 
-                coinChangeDollar, coinChangePercent, aiAnalysis = self.RetrieveEventDetails(eventBody)
+                coinChangeDollar, coinChangePercent, aiAnalysis, validation = self.RetrieveEventDetails(eventBody)
                 
                 entries.append(CMCEvent(
                     coin = coin,
@@ -51,14 +53,16 @@ class Scrap:
                     description = description,
                     coinChangeDollar = coinChangeDollar,
                     coinChangePercent = coinChangePercent,
-                    aiAnalysis = aiAnalysis
+                    aiAnalysis = aiAnalysis,
+                    confidencePct = validation.confidencePct,
+                    votes = validation.votes
                 ))
                 
             return entries
         else:
             print(f"Failed to retrieve page. Status code: {response.status_code}")
             
-    def RetrieveEventDetails(self, eventBody: PageElement) -> tuple[str, str, str]:
+    def RetrieveEventDetails(self, eventBody: PageElement) -> tuple[str, str, str, CMCEventValidation]:
         """
             Enters the event page and retrieves more details about the event such as coin change dollar, coin change percent and AI analysis.
         """
@@ -66,21 +70,44 @@ class Scrap:
         eventHref = eventBody.find_all('a', class_="link-detail")[-1]['href']
         response = requests.get(f"{self.baseUrl}{eventHref}", headers = self.headers)
         
+        eventId = eventHref.split('/')[-1]
+        
         if response.status_code == 200:
             soup = BeautifulSoup(response.content, 'html.parser')
             
-            coinChangeDollar = coinChangePercent = aiAnalysis = None
+            eventDetail = soup.find('section', id="event-detail")
             
-            if coinListItem := soup.find('div', class_="coin-list-item"):
+            coinChangeDollar = coinChangePercent = aiAnalysis = proofHref = validation = None
+            
+            if coinListItem := eventDetail.find('div', class_="coin-list-item"):
                 coinChangeDollar = coinListItem.find('span', class_="change-dollar").get_text(strip=True)
                 coinChangePercent = re.sub(r'\s+%', '%', coinListItem.find('span', class_="change-percent").find('span').get_text(strip=True))
                 
-            if description := soup.find('div', id="description", class_="my-4"):
+            if description := eventDetail.find('div', id="description", class_="my-4"):
                 if badge := description.find('span', class_="badge"):
                     if aiAnalysis := badge.next_sibling:
                         aiAnalysis = aiAnalysis.get_text(strip=True)
                         print(f"AI Analysis: {aiAnalysis}")
                         
-            return coinChangeDollar, coinChangePercent, aiAnalysis
+            if ref := eventDetail.find('div', class_="mt-1"):
+                if not os.path.exists(f"{self.imagesPath}/{eventId}.png"):
+                    proofHref = ref.find('a')['href']
+                    proofImage = requests.get(proofHref, headers = self.headers)
+                    if proofImage.status_code == 200:
+                        with open(f"{eventId}.png", 'wb') as f:
+                            f.write(proofImage.content)
+                    else:
+                        print(f"Failed to retrieve proof image {eventId}. Status code: {proofImage.status_code}")
+                        
+            if validationContainer := eventDetail.find('div', class_="mb-3 p-4 card"):
+                valConfidencePct = validationContainer.find('div', id="confidence-index").find('span', class_="count-to").get_text(strip=True)
+                valVotes = validationContainer.find('div', id="vote-number").find('span', class_="count-to").get_text(strip=True)
+                
+                validation = CMCEventValidation(
+                    confidencePct = int(valConfidencePct),
+                    votes = int(valVotes)
+                )
+                        
+            return coinChangeDollar, coinChangePercent, aiAnalysis, validation
         else:
             print(f"Failed to retrieve event details ")
