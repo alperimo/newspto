@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 
 @dataclass
 class CMCEvent:
+    id: str = ""
     coin: str = ""
     date: str = ""
     title: str = ""
