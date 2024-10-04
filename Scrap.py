@@ -6,6 +6,8 @@ from Dataclasses import CMCEvent, CMCEventValidation
 
 import datetime, os, re, requests
 
+import Constants
+
 class Scrap:
     def __init__(self):
         self.baseUrl = 'https://coinmarketcal.com'
@@ -13,17 +15,16 @@ class Scrap:
             'Authority': 'coinmarketcal.com',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-            'Cookie': 'device_view=full; _ga=GA1.1.786695681.1726145331; _ga_90JJS7QB1F=GS1.1.1727994839.12.1.1727994907.0.0.0; AWSALB=XgPTgNYiTg7gBE1B4UOXxyL4RRhXC3KYqmlLI+gzKU+03lhcusLmQAkUzpctgu+hGPbEYal+rMcoRFB6SpxPjdB7FYRxgpJ16KIrUGyVbr0j7FKjEcZtHLHyNAc9; cf_clearance=XgTUBJ.bDjyA5s4Uj7Uq.KpjByBe5uuWQNCcfDhjTYQ-1727994907-1.2.1.1-niiltsjH1B6p78_1boUPfKHvakuSFvuK1i.sxa_4SfRcmGNnyVfQmBONWgiUk0LpHfTmFEToFdLItgdhT_ZIk5nGgbo.onsaKAbXozbW.sepM2ehayAIg2HBf4C8Us0uz76XKIjekKQSanfGDn6wmJj_v0Ye4o8p2iTpCrGJ.VzrmiRDYm8kUyjPcHrpSi89lDl1YWiC72btAV9XPNbotTGkb5kWLl9lk5IHERtRqoJqNvpOPwkuhbDX7PXkkwR69AwvGR51mG7YbncDYR0e_Kpo5FZGGzQfl1TtUArSpQDuGRnAd3CWdPfIz56dtq4vmXQ7np8Gvd5ioic0gTmpEJvP0d.FLDqWAckJARLOcgDti_in_NvFDdtAGo6GGtDETM8ur7iDDKYeZKnqhaFGWMv2anawtZfQKAu1fFF1ajs5sfbA7IHSGJ_xP.0hQJrX',
-            'Referer': 'https://coinmarketcal.com/en/?form%5Bdate_range%5D=26%2F09%2F2024+-+30%2F07%2F2027&form%5Bkeyword%5D=&form%5Bcoin%5D%5B%5D=top300&form%5Bsort_by%5D=&form%5Bsubmit%5D=',
+            'Cookie': 'device_view=full; _ga=GA1.1.786695681.1726145331; AWSALB=7D8sZY+UNs8F8VcBefWtg6IAakwFhW0P4hbAe+bPQF9oDKKSo8opRWn01/XB6Fhpj2RqWsQsPiEA55opTFtz/oGF5F9zzZz3eveQvEgUknGAFHAo/kK0+QujEY8d; _ga_90JJS7QB1F=GS1.1.1728077005.14.1.1728077867.0.0.0; cf_clearance=VyMvh1PzBuGJczdznK8wJfvYstKCzIhHercAAokuRqs-1728077869-1.2.1.1-Iaf32p_UCTdd4M30hlv_iLS8C3Kptv.b4tV2BSakm_qORryLv05kcaEaUASJJtXrDTtU2Zs7VsXsePTXrh0ITXkeN3AvjlA.g8m2XGzkxwWX8HKMO1c.MFuxp3zyCZ5nmWpo5Oc_sKjVtQbmOPv510KOlL2nR880e77x741BAvrPs_jRxh0x2GBZH3BRT5LYXPoyPz_Dxs7k506x7v1QmbL0JWF1f7ni6iXwrNgt2C51hpoQX0bZYrNK42TBqllTJPKJYzBdxHACIpNHhEuOJIf3m_oqh7Nc6oVnabBnqP65B5bnrrK2nUuHohA8F3mZsn3v_r.2Jr8C9u6svzW0PaI27xEUOE.rofZJ7NOIiKba9FMs0NLj5p2FcI2RbY3oV04yBARJWjqoC3lXpwz70Fwfc3zd4hEb44f9JRUk25sPQgwAz0woM75HTONOf8Kt'
         }
         
-        self.imagesPath = 'data/images'
+        self.imagesPath = Constants.SCRAP_OUTPUTS_PATH + '/images'
         
-    def RetrieveEvents(self, dateRange: str = "", coinType: list[str] = ["top300"]) -> list[CMCEvent]:
+    def RetrieveEvents(self, dateRange: str = "", coins: list[str] = ["top300"]) -> list[CMCEvent]:
         params = {
             'form[date_range]': dateRange,
             'form[keyword]': '',
-            'form[coin][]': coinType,
+            'form[coin][]': coins,
             'form[sort_by]': '',
             'form[submit]': '',
             'form[show_reset]': ''

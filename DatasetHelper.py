@@ -12,6 +12,10 @@ class DatasetHelper:
     
     @staticmethod
     def CreateEventEntriesDataset(entries: list[dict[str, Any]], outputPath: str):
+        if len(entries) == 0:
+            print("No entries to create dataset!")
+            return None
+        
         df: pd.DataFrame = pd.DataFrame([asdict(entry) for entry in entries])
         df.to_json(outputPath, orient='records', lines=True)
         print(f"Dataset created at {outputPath} as JSON format with {len(entries)} entries!")

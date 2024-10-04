@@ -4,11 +4,15 @@ from Scrap import Scrap
 
 import datetime
 
-CMC_DATASET_PATH = 'data/{}_cmc_coin_pastevents.json'
+import Constants, DataUtils
+
+CMC_DATASET_PATH = Constants.SCRAP_OUTPUTS_PATH + '/{}_cmc_coin_pastevents.json'
 
 def main():
+    DataUtils.Load()
+    
     scrap = Scrap()
-    events = scrap.RetrieveEvents(dateRange="02/10/2022 - 02/10/2023")
+    events = scrap.RetrieveEvents(dateRange="02/10/2022 - 02/10/2023", coins = ["1000sats-ordinals"])
     if events is None:
         print("Failed to retrieve events.")
         return

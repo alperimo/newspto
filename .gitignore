@@ -1,3 +1,5 @@
 .vscode/
+.helpers/
 __pycache__
+data/scrap-outputs/
 roadmap.txt

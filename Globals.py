@@ -1,0 +1,1 @@
+topCoinNameBySymbol: dict[str, str] = {}
