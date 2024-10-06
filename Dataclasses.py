@@ -19,6 +19,8 @@ class CMCEvent:
     confidencePct: int = 0
     votes: int = 0
     
+    proofImage: str = ""
+    
     # All coin price values 1-2-3-4-5-7-14-30 days after the event
     coinChangesByDay: list[str] = field(default_factory=list)
     

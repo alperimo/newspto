@@ -15,19 +15,20 @@ class Scrap:
             'Authority': 'coinmarketcal.com',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-            'Cookie': 'device_view=full; _ga=GA1.1.786695681.1726145331; AWSALB=7D8sZY+UNs8F8VcBefWtg6IAakwFhW0P4hbAe+bPQF9oDKKSo8opRWn01/XB6Fhpj2RqWsQsPiEA55opTFtz/oGF5F9zzZz3eveQvEgUknGAFHAo/kK0+QujEY8d; _ga_90JJS7QB1F=GS1.1.1728077005.14.1.1728077867.0.0.0; cf_clearance=VyMvh1PzBuGJczdznK8wJfvYstKCzIhHercAAokuRqs-1728077869-1.2.1.1-Iaf32p_UCTdd4M30hlv_iLS8C3Kptv.b4tV2BSakm_qORryLv05kcaEaUASJJtXrDTtU2Zs7VsXsePTXrh0ITXkeN3AvjlA.g8m2XGzkxwWX8HKMO1c.MFuxp3zyCZ5nmWpo5Oc_sKjVtQbmOPv510KOlL2nR880e77x741BAvrPs_jRxh0x2GBZH3BRT5LYXPoyPz_Dxs7k506x7v1QmbL0JWF1f7ni6iXwrNgt2C51hpoQX0bZYrNK42TBqllTJPKJYzBdxHACIpNHhEuOJIf3m_oqh7Nc6oVnabBnqP65B5bnrrK2nUuHohA8F3mZsn3v_r.2Jr8C9u6svzW0PaI27xEUOE.rofZJ7NOIiKba9FMs0NLj5p2FcI2RbY3oV04yBARJWjqoC3lXpwz70Fwfc3zd4hEb44f9JRUk25sPQgwAz0woM75HTONOf8Kt'
+            'Cookie': 'device_view=full; _ga=GA1.1.786695681.1726145331; PHPSESSID=4dfj58q64ht5qvuvgt7ui23ops; cf_clearance=lXJAvrGPGOGs97J5EkRwubzv5fsm4Zd.ddgp9Cmh9IY-1728177531-1.2.1.1-XN.xX_DnhAjTdgKZc8A0poKN_NkuWTR_112MmS2qbHjv3ylTwLE2XOBZL8yrVRw98ASUeuupD5qBf2343lJa1X6jep6RLRhwpJYSi36am5J_o5zj7jDlRkqkQ93dwWfabmpF2Fgo_8QaXg8fQ5QkbBMJuR92YOnIFk__bjGbd7YADvQHnKBBCiWuso4G_40c98mQ9M_FAsvps4hDDbycSK5ttz6qgrMwtS5dnG46QvR9moX3EiAXC953kdAGultAk_8m03HcgsObE9v5VuMLxpu3zLd.HkMHaJH.BNzDI4xinmLBTkQUOl_iCVt5RlbYWje.7AdFy39wmIVuk03rwTDYyRaBkN5smVj40Dzf9S3V4WoaZlrBCauUoCmB8MEYmb5l7npNHXh310DKWKimoz9ljcZkNu9LxmL94Mqrse_aUJgk2yZe0ZplHPWSMou9; AWSALB=oRdBQVSvQgQzjGe+p5hxAhwVARwPujpMyhQ58FvVVLkUIdic6tAWzIf1T//WMVWVk6g95x2iELb/Jyn2MVKB5IgYEwdR+6rrYq2Bfz8QIfGIn5DSNJBaKmK0U8w7; _ga_90JJS7QB1F=GS1.1.1728175738.16.1.1728177805.0.0.0'
         }
         
         self.imagesPath = Constants.SCRAP_OUTPUTS_PATH + '/images'
         
-    def RetrieveEvents(self, dateRange: str = "", coins: list[str] = ["top300"]) -> list[CMCEvent]:
+    def RetrieveEvents(self, dateRange: str = "", coins: list[str] = [""], page: int = 1) -> list[CMCEvent]:
         params = {
             'form[date_range]': dateRange,
             'form[keyword]': '',
             'form[coin][]': coins,
             'form[sort_by]': '',
             'form[submit]': '',
-            'form[show_reset]': ''
+            'form[show_reset]': '',
+            'page': page
         }
         
         response = requests.get(f"{self.baseUrl}/en/pastevents", headers = self.headers, params = params)
@@ -38,7 +39,7 @@ class Scrap:
             
             entries: list[CMCEvent] = []
             
-            for event in event_entries[:10]:
+            for event in event_entries:
                 eventBody = event.find_next('div', class_="card__body")
                 
                 if coin := eventBody.find_next('h5', class_="card__coins"):
@@ -66,7 +67,8 @@ class Scrap:
                     coinChangePercent = coinChangePercent,
                     aiAnalysis = aiAnalysis or "",
                     confidencePct = validation.confidencePct,
-                    votes = validation.votes
+                    votes = validation.votes,
+                    proofImage= f"{self.imagesPath}/{eventId}.png".replace("\/", "/")
                 ))
                 
             return entries
@@ -105,7 +107,7 @@ class Scrap:
                         print(f"AI Analysis: {aiAnalysis}")
                         
             if ref := eventDetail.find('div', class_="mt-1"):
-                date: str = datetime.datetime.now().strftime("%d%m%Y_%H%M")
+                date: str = datetime.datetime.now().strftime("%d%m%Y-%H%M")
                 imageFolderPath = f"{self.imagesPath}"
                 imagePath = f"{imageFolderPath}/{eventId}.png"
                 if not os.path.exists(imageFolderPath):
@@ -121,8 +123,13 @@ class Scrap:
                         print(f"Failed to retrieve proof image {eventId}. Status code: {proofImage.status_code}")
                         
             if validationContainer := eventDetail.find('div', class_="mb-3 p-4 card"):
-                valConfidencePct = validationContainer.find('div', id="confidence-index").find('span', class_="count-to").get_text(strip=True)
-                valVotes = validationContainer.find('div', id="vote-number").find('span', class_="count-to").get_text(strip=True)
+                valConfidencePct = valVotes = 0
+                
+                if valConfidencePctContainer := validationContainer.find('div', id="confidence-index").find('span', class_="count-to"):
+                    valConfidencePct = valConfidencePctContainer.get_text(strip=True)
+                
+                if valVotesContainer := validationContainer.find('div', id="vote-number").find('span', class_="count-to"):
+                    valVotes = valVotesContainer.get_text(strip=True)
                 
                 validation = CMCEventValidation(
                     confidencePct = int(valConfidencePct),
