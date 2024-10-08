@@ -15,12 +15,14 @@ class Scrap:
             'Authority': 'coinmarketcal.com',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-            'Cookie': 'device_view=full; _ga=GA1.1.786695681.1726145331; PHPSESSID=4dfj58q64ht5qvuvgt7ui23ops; cf_clearance=lXJAvrGPGOGs97J5EkRwubzv5fsm4Zd.ddgp9Cmh9IY-1728177531-1.2.1.1-XN.xX_DnhAjTdgKZc8A0poKN_NkuWTR_112MmS2qbHjv3ylTwLE2XOBZL8yrVRw98ASUeuupD5qBf2343lJa1X6jep6RLRhwpJYSi36am5J_o5zj7jDlRkqkQ93dwWfabmpF2Fgo_8QaXg8fQ5QkbBMJuR92YOnIFk__bjGbd7YADvQHnKBBCiWuso4G_40c98mQ9M_FAsvps4hDDbycSK5ttz6qgrMwtS5dnG46QvR9moX3EiAXC953kdAGultAk_8m03HcgsObE9v5VuMLxpu3zLd.HkMHaJH.BNzDI4xinmLBTkQUOl_iCVt5RlbYWje.7AdFy39wmIVuk03rwTDYyRaBkN5smVj40Dzf9S3V4WoaZlrBCauUoCmB8MEYmb5l7npNHXh310DKWKimoz9ljcZkNu9LxmL94Mqrse_aUJgk2yZe0ZplHPWSMou9; AWSALB=oRdBQVSvQgQzjGe+p5hxAhwVARwPujpMyhQ58FvVVLkUIdic6tAWzIf1T//WMVWVk6g95x2iELb/Jyn2MVKB5IgYEwdR+6rrYq2Bfz8QIfGIn5DSNJBaKmK0U8w7; _ga_90JJS7QB1F=GS1.1.1728175738.16.1.1728177805.0.0.0'
+            'Cookie': 'device_view=full; _ga=GA1.1.786695681.1726145331; cmcalmode=dark; _ga_90JJS7QB1F=GS1.1.1728389960.29.1.1728389969.0.0.0; cf_clearance=try.jukmJ4dXmzU6WFw_QCHq_wP52DDLG7DuvSg.2N4-1728389970-1.2.1.1-L.2X2JTF2Euh7NrvR_7GQaSzTJzxzFyQwTu.FqiP_OIVgvdpIxaAMSarKFoLHRw3RIIe5CZw_I3OYNak3E2sPnjjseBJAd9qxB5ZkqNwCAKUewj2_DtdisczKv9e57EraIbignOlSrhPNYPkSc8EtH5mG5YSGe7975ACCbqTeZD0H8sCNcQOAzwus.Q9AEldU640KS60xkhpCAoSoyL3szjBhic05bT9gFPT1yinodcsWIubsK3XiIcylO5.QNGcVj.Vdof4ibBfEXXw4pPEAAGABz7f6m1_yDuUOEHkRGQtb4C.G8cjkwFUu8abvTSSOexq0EPne56dNqoiGFlwnD5pkuWO00Isbgx_a.X.xgz7PJaBNMr4H4aaxcx6ZYX1OEr2SNPBFdfSxUN_OaFnMD7U0QlOIW02OFibgNYMaXBW2CJ2bXmCUdsk8fNAuI.s; AWSALB=gJk/V9juIXi5QGthQXp23xTq0UOMq7YnrJoZYbBVRkw9pIml8HiHHxnPx6/7YUdwtWgr5neGOSYNgB8fRd+44otImqotqPmjmFrb0MHd5HPR1G6AFVlGZYrUxYsk; PHPSESSID=1q6s7n1f5kk1irtp01um62m5qe'
         }
         
         self.imagesPath = Constants.SCRAP_OUTPUTS_PATH + '/images'
         
     def RetrieveEvents(self, dateRange: str = "", coins: list[str] = [""], page: int = 1) -> list[CMCEvent]:
+        print(f"Retrieving events for the page {page} between the dates {dateRange}.")
+        
         params = {
             'form[date_range]': dateRange,
             'form[keyword]': '',
@@ -39,12 +41,11 @@ class Scrap:
             
             entries: list[CMCEvent] = []
             
-            for event in event_entries:
+            for index, event in enumerate(event_entries, start=1):
                 eventBody = event.find_next('div', class_="card__body")
                 
-                if coin := eventBody.find_next('h5', class_="card__coins"):
-                    # TODO: Handle other coins in the string
-                    coin = coin.find('a').get_text(strip=True)
+                """if coin := eventBody.find_next('h5', class_="card__coins"):
+                    coin = coin.find('a').get_text(strip=True)"""
                 
                 if date := eventBody.find_next('h5', class_="card__date mt-0"):
                     date = date.get_text(strip=True)
@@ -55,27 +56,31 @@ class Scrap:
                 if description := eventBody.find_next('p', class_="card__description"):
                     description = description.get_text(strip=True)
                 
-                eventId, coinChangeDollar, coinChangePercent, aiAnalysis, validation = self.RetrieveEventDetails(eventBody)
+                eventId, category, coins, coinChangeDollars, coinChangePercents, sourceHref, aiAnalysis, validation = self.RetrieveEventDetails(page, eventBody)
                 
                 entries.append(CMCEvent(
                     id = eventId,
-                    coin = coin,
+                    category = category,
+                    coins = coins,
                     date = date,
                     title = title,
                     description = description,
-                    coinChangeDollar = coinChangeDollar,
-                    coinChangePercent = coinChangePercent,
+                    coinChangeDollarsOnRetrieve = coinChangeDollars,
+                    coinChangePercentsOnRetrieve = coinChangePercents,
                     aiAnalysis = aiAnalysis or "",
                     confidencePct = validation.confidencePct,
                     votes = validation.votes,
-                    proofImage= f"{self.imagesPath}/{eventId}.png".replace("\/", "/")
+                    proofImage= f"{self.imagesPath}/{page}/{eventId}.png".replace("\\/", "/"),
+                    sourceHref = sourceHref or ""
                 ))
+                
+                #print(f"{index}. Event: coins {coins} with title {title} for the date {date} retrieved.")
                 
             return entries
         else:
             print(f"Failed to retrieve page. Status code: {response.status_code}")
             
-    def RetrieveEventDetails(self, eventBody: PageElement) -> tuple[str, str, str, str, CMCEventValidation]:
+    def RetrieveEventDetails(self, page: int, eventBody: PageElement) -> tuple[str, str, list[str], list[str], list[str], str, str, CMCEventValidation]:
         """
             Enters the event page and retrieves more details about the event such as coin change dollar, coin change percent and AI analysis.
         """
@@ -90,52 +95,61 @@ class Scrap:
             
             eventDetail = soup.find('section', id="event-detail")
             
-            coinChangeDollar = coinChangePercent = aiAnalysis = proofHref = validation = None
+            coinNames, coinChangeDollars, coinChangePercents = [], [], []
+            category = aiAnalysis = proofHref = sourceHref = validation = None
             
-            if coinListItem := eventDetail.find('div', class_="coin-list-item"):
-                try:
-                    coinChangeDollar = coinListItem.find('span', class_="change-dollar").get_text(strip=True)
-                    coinChangePercent = re.sub(r'\s+%', '%', coinListItem.find('span', class_="change-percent").find('span').get_text(strip=True))
-                except AttributeError:
-                    coinChangeDollar = None
-                    coinChangePercent = None
+            if categories := eventDetail.find('div', class_="categories"):
+                category = categories.find('a').get_text(strip=True)
+            
+            coinListItems = eventDetail.find_all('div', class_="coin-list-item")
+            if coinListItems:
+                for coinListItem in coinListItems:
+                    coinNames.append(coinListItem.find('span', class_="name fz-16 ellipsis").get_text(strip=True))
+                    try:
+                        coinChangeDollars.append(coinListItem.find('span', class_="change-dollar").get_text(strip=True))
+                        coinChangePercents.append(re.sub(r'\s+%', '%', coinListItem.find('span', class_="change-percent").find('span').get_text(strip=True)))
+                    except AttributeError:
+                        coinChangeDollars.append("")
+                        coinChangePercents.append("")
                 
             if description := eventDetail.find('div', id="description", class_="my-4"):
                 if badge := description.find('span', class_="badge"):
                     if aiAnalysis := badge.next_sibling:
                         aiAnalysis = aiAnalysis.get_text(strip=True)
-                        print(f"AI Analysis: {aiAnalysis}")
                         
-            if ref := eventDetail.find('div', class_="mt-1"):
-                date: str = datetime.datetime.now().strftime("%d%m%Y-%H%M")
-                imageFolderPath = f"{self.imagesPath}"
+            if refs := eventDetail.find('div', class_="mt-1"):
+                imageFolderPath = f"{self.imagesPath}/{page}"
                 imagePath = f"{imageFolderPath}/{eventId}.png"
                 if not os.path.exists(imageFolderPath):
                     os.makedirs(imageFolderPath)
-                    
+                  
+                refs = refs.find_all('a')  
                 if not os.path.exists(imagePath):
-                    proofHref = ref.find('a')['href']
+                    proofHref = refs[0]['href']
                     proofImage = requests.get(proofHref, headers = self.headers)
                     if proofImage.status_code == 200:
                         with open(imagePath, 'wb') as f:
                             f.write(proofImage.content)
                     else:
                         print(f"Failed to retrieve proof image {eventId}. Status code: {proofImage.status_code}")
+                
+                if len(refs) > 1:
+                    sourceHref = refs[1]['href']
                         
             if validationContainer := eventDetail.find('div', class_="mb-3 p-4 card"):
                 valConfidencePct = valVotes = 0
                 
                 if valConfidencePctContainer := validationContainer.find('div', id="confidence-index").find('span', class_="count-to"):
-                    valConfidencePct = valConfidencePctContainer.get_text(strip=True)
+                    valConfidencePct = int(valConfidencePctContainer.get_text(strip=True))
                 
                 if valVotesContainer := validationContainer.find('div', id="vote-number").find('span', class_="count-to"):
-                    valVotes = valVotesContainer.get_text(strip=True)
+                    valVotes = int(valVotesContainer.get_text(strip=True))
                 
                 validation = CMCEventValidation(
-                    confidencePct = int(valConfidencePct),
-                    votes = int(valVotes)
+                    confidencePct = valConfidencePct,
+                    votes = valVotes
                 )
-                        
-            return eventId, coinChangeDollar, coinChangePercent, aiAnalysis, validation
+                             
+            return eventId, category, coinNames, coinChangeDollars, coinChangePercents, sourceHref, aiAnalysis, validation
         else:
             print(f"Failed to retrieve event details ")

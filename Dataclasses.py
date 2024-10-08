@@ -8,18 +8,20 @@ from dataclasses import dataclass, field
 @dataclass
 class CMCEvent:
     id: str = ""
-    coin: str = ""
+    category: str = ""
+    coins: list[str] = field(default_factory=list)
     date: str = ""
     title: str = ""
     description: str = ""
-    coinChangeDollar: str = ""
-    coinChangePercent: str = ""
+    coinChangeDollarsOnRetrieve: list[str] = field(default_factory=list)
+    coinChangePercentsOnRetrieve: list[str] = field(default_factory=list)
     aiAnalysis: str = ""
     
     confidencePct: int = 0
     votes: int = 0
     
     proofImage: str = ""
+    sourceHref: str = ""
     
     # All coin price values 1-2-3-4-5-7-14-30 days after the event
     coinChangesByDay: list[str] = field(default_factory=list)

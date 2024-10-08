@@ -14,25 +14,21 @@ def main():
     dateRange: str = Globals.scrapData["DateRange"]
     scrapedPageCount: int = 0
     triesOnFail: int = 0
-    while scrapedPageCount < 3:
+    while scrapedPageCount < Globals.scrapData["PagesToScrape"]:
         events = scrap.RetrieveEvents(dateRange = dateRange, coins = [""], page = currentPage)
         if events is None:
             print(f"Failed to retrieve events for the page {currentPage} between the dates {dateRange}.")
-            triesOnFail += 1
-            
-            if triesOnFail > 3:
-                break
-            
-            continue
+            break
             
         dataset = DatasetHelper.CreateEventEntriesDataset(events, Constants.CMC_DATASET_PATH.format(currentPage, datetime.datetime.now().strftime("%d%m%Y_%H%M")))
 
         scrapedPageCount += 1
         currentPage += 1
+        
+        Globals.scrapData["CurrentPage"] = currentPage
+        DataUtils.SaveScrapData()
     
     #fineTuner = Finetuner(dataset)
-    
-    DataUtils.SaveScrapData()
 
 if __name__ == '__main__':
     main()
