@@ -1,5 +1,15 @@
-import json
+from datasets import load_dataset
+
+import json, os
 import Constants, Globals
+
+@staticmethod
+def LoadEventValidations():
+    filePath = f"{Constants.DATA_PATH}/EventValidations.json"
+    if not os.path.exists(filePath):
+        return
+    
+    Globals.eventValidations = load_dataset('json', data_files=filePath, split='train').to_pandas()
 
 @staticmethod
 def LoadTopCoinNames():

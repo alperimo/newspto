@@ -2,4 +2,6 @@
 .helpers/
 __pycache__
 data/scrap-outputs/
+data/coin-historical-data/
+data/EventValidations.json
 roadmap.txt

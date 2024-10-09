@@ -2,7 +2,7 @@ from typing import Any
 from bs4 import BeautifulSoup
 from bs4.element import PageElement, ResultSet
 
-from Dataclasses import CMCEvent, CMCEventValidation
+from Dataclasses import CMCEvent, CMCEventValidation, CMCTest
 
 import datetime, os, re, requests
 
@@ -15,7 +15,7 @@ class Scrap:
             'Authority': 'coinmarketcal.com',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-            'Cookie': 'device_view=full; _ga=GA1.1.786695681.1726145331; cmcalmode=dark; _ga_90JJS7QB1F=GS1.1.1728389960.29.1.1728389969.0.0.0; cf_clearance=try.jukmJ4dXmzU6WFw_QCHq_wP52DDLG7DuvSg.2N4-1728389970-1.2.1.1-L.2X2JTF2Euh7NrvR_7GQaSzTJzxzFyQwTu.FqiP_OIVgvdpIxaAMSarKFoLHRw3RIIe5CZw_I3OYNak3E2sPnjjseBJAd9qxB5ZkqNwCAKUewj2_DtdisczKv9e57EraIbignOlSrhPNYPkSc8EtH5mG5YSGe7975ACCbqTeZD0H8sCNcQOAzwus.Q9AEldU640KS60xkhpCAoSoyL3szjBhic05bT9gFPT1yinodcsWIubsK3XiIcylO5.QNGcVj.Vdof4ibBfEXXw4pPEAAGABz7f6m1_yDuUOEHkRGQtb4C.G8cjkwFUu8abvTSSOexq0EPne56dNqoiGFlwnD5pkuWO00Isbgx_a.X.xgz7PJaBNMr4H4aaxcx6ZYX1OEr2SNPBFdfSxUN_OaFnMD7U0QlOIW02OFibgNYMaXBW2CJ2bXmCUdsk8fNAuI.s; AWSALB=gJk/V9juIXi5QGthQXp23xTq0UOMq7YnrJoZYbBVRkw9pIml8HiHHxnPx6/7YUdwtWgr5neGOSYNgB8fRd+44otImqotqPmjmFrb0MHd5HPR1G6AFVlGZYrUxYsk; PHPSESSID=1q6s7n1f5kk1irtp01um62m5qe'
+            'Cookie': 'device_view=full; _ga=GA1.1.786695681.1726145331; cmcalmode=dark; PHPSESSID=p7i4tvdrvt9o1jigs04vp2iqr6; AWSALB=rpU2unve5z0Xwa4A6L4QdVKrldqms5aFg4RJTLv4siMYocmuYN+MKGEnFw3edQGaGiOk0afr2CXN3D6BnNgZeFiGioFKi4FQCLLeDpnpw2ByLrMvwY8k3T7gMo11; _ga_90JJS7QB1F=GS1.1.1728419432.32.1.1728419438.0.0.0; cf_clearance=CG8pJa46S5MlUe0pVVxfhw04v_S4dGkxTBmPz1iGuOU-1728419441-1.2.1.1-ErEvy5ShJ9FpMzKTSn5UCwB3mD_10rv7JudqBcw9iyeSIJmlwVumslD38i147TYbK1T_9HemGc4cK00mUIY.3iFcuO9BgO46RwJf7NradYzUvlfbLnlaYdvptuxQk0O3YqG8aC75IN8KKsYWBP5Fl.rBWa.ej7eg5dhx5B6.GPCMSax1KOaj_so6gOlA_6U42qbSDLDmINi61t3CPNEDqrfy5kPJcdhDn6e23F5Uo55Bu1nblEiMqII8V0soAmrb4Q_fF8O._WbXqzYt5tDJis_b5IMKNFU4RKtpkz4FG6aT09uS21T0lpsSB_qdKq4amUW8TAz_D3IMiWbMTU0pyElhcvXn2uGQKZoE4IanEjWOFLIoKYpS5PPDqrfRAviUYMhEqQp7ZkeamvKIjQKb4mieZoF26REML1sHy1euZMmOesY8Dk3pJ_mAWwXErC9Y'
         }
         
         self.imagesPath = Constants.SCRAP_OUTPUTS_PATH + '/images'
@@ -75,7 +75,7 @@ class Scrap:
                 ))
                 
                 #print(f"{index}. Event: coins {coins} with title {title} for the date {date} retrieved.")
-                
+            
             return entries
         else:
             print(f"Failed to retrieve page. Status code: {response.status_code}")
@@ -140,11 +140,11 @@ class Scrap:
                 valConfidencePct = valVotes = 0
                 
                 if valConfidencePctContainer := validationContainer.find('div', id="confidence-index").find('span', class_="count-to"):
-                    valConfidencePct = int(valConfidencePctContainer.get_text(strip=True))
+                    valConfidencePct = float(valConfidencePctContainer.get("data-countto"))
                 
                 if valVotesContainer := validationContainer.find('div', id="vote-number").find('span', class_="count-to"):
-                    valVotes = int(valVotesContainer.get_text(strip=True))
-                
+                    valVotes = int(valVotesContainer.get("data-countto"))
+                    
                 validation = CMCEventValidation(
                     confidencePct = valConfidencePct,
                     votes = valVotes

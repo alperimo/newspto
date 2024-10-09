@@ -17,7 +17,7 @@ class CMCEvent:
     coinChangePercentsOnRetrieve: list[str] = field(default_factory=list)
     aiAnalysis: str = ""
     
-    confidencePct: int = 0
+    confidencePct: float = 0.0
     votes: int = 0
     
     proofImage: str = ""
@@ -31,5 +31,5 @@ class CMCEvent:
     
 @dataclass
 class CMCEventValidation:
-    confidencePct: int = 0
+    confidencePct: float = 0
     votes: int = 0
