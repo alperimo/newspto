@@ -1,8 +1,15 @@
+from binance.client import Client
 from datasets import load_dataset
+from dotenv import load_dotenv
 
 import json, os
 import Constants, Globals
 
+@staticmethod
+def LoadEnv():
+    load_dotenv()
+    Globals.binanceClient = Client(os.getenv("BNC_API_KEY"), os.getenv("BNC_API_SECRET_KEY"))
+    
 @staticmethod
 def LoadEventValidations():
     filePath = f"{Constants.DATA_PATH}/EventValidations.json"
@@ -25,6 +32,7 @@ def LoadScrapData():
 
 @staticmethod
 def Load():
+    LoadEnv()
     LoadTopCoinNames()
     LoadScrapData()
     

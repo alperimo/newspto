@@ -2,5 +2,8 @@
     "DateRange": "25/11/2017 - 05/10/2024",
     "CurrentPage": 1576,
     ".CurrentPage": 1605,
-    "PagesToScrape": 500
+    "PagesToScrape": 500,
+
+    "CoinUpdateCurrentPage": 1,
+    "CoinUpdatePagesToProcess": 5
 }

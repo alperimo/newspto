@@ -6,7 +6,8 @@ from DatasetHelper import DatasetHelper
 from Scrap import Scrap
 
 import datetime
-import Constants, Globals, DataUtils
+import Constants, Globals, DataUtils, DateUtils
+import CoinUtils
 
 def ScrapEvents():
     scrap = Scrap()
@@ -14,7 +15,6 @@ def ScrapEvents():
     currentPage: int = int(Globals.scrapData["CurrentPage"])
     dateRange: str = Globals.scrapData["DateRange"]
     scrapedPageCount: int = 0
-    triesOnFail: int = 0
     
     while scrapedPageCount < Globals.scrapData["PagesToScrape"]:
         events = scrap.RetrieveEvents(dateRange = dateRange, coins = [""], page = currentPage)
@@ -32,9 +32,11 @@ def ScrapEvents():
 
 def main():
     DataUtils.Load()
-    ScrapEvents()
+    #ScrapEvents()
     
-    #TODO: use DatasetHelper.UpdateEventsCoinData() to update the datasets with the coin data
+    #test = CoinUtils.GetHistoricalData("BTCUSDT", "1h", "2024-10-14")
+    
+    #DatasetHelper.UpdateAllEventsCoinData()
     #DatasetHelper.UpdateCoinsHistoricalData(Globals.coinHistoricalDataByInterval)
     
     #fineTuner = Finetuner(dataset)

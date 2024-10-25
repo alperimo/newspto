@@ -2,7 +2,7 @@ from typing import Any
 from bs4 import BeautifulSoup
 from bs4.element import PageElement, ResultSet
 
-from Dataclasses import CMCEvent, CMCEventValidation, CMCTest
+from Dataclasses import CMCEvent, CMCEventValidation
 
 import datetime, os, re, requests
 

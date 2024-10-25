@@ -1,12 +1,14 @@
-from binance.client import Client
 from typing import Any
 import pandas as pd
 
 import Globals
 
 @staticmethod
-def GetHistoricalData(symbol: str, interval: str, start_str: str | int, end_str: str | int) -> pd.DataFrame:
-    klines = Client.get_historical_klines(symbol, interval, start_str, end_str)
+def GetHistoricalData(symbol: str, interval: str, start_str: str | int, end_str: str | int = None) -> pd.DataFrame:
+    klines = Globals.binanceClient.get_historical_klines(symbol, interval, start_str, end_str)
+    
+    if not klines:
+        raise ValueError(f"No data found for {symbol} in {interval} interval.")
     
     df = pd.DataFrame(klines)
     df.drop(df.columns[[6, 7, 8, 9, 10, 11]], axis=1, inplace=True)

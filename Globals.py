@@ -1,6 +1,9 @@
 from collections import defaultdict
 from typing import Any
+from binance.client import Client
 import pandas as pd
+
+binanceClient: Client = None
 
 topCoinNameBySymbol: dict[str, str] = {}
 
