@@ -29,15 +29,30 @@ def ScrapEvents():
         
         Globals.scrapData["CurrentPage"] = currentPage
         DataUtils.SaveScrapData()
+        
+def TestWeightLimits():
+    import requests
+    url = "https://api.binance.com/api/v3/exchangeInfo"
+
+    response = requests.get(url)
+    data = response.json()
+
+    for rate_limit in data['rateLimits']:
+        print(f"Limit Type: {rate_limit['rateLimitType']}, Interval: {rate_limit['interval']}, Limit: {rate_limit['limit']}")
 
 def main():
     DataUtils.Load()
     #ScrapEvents()
     
+    TestWeightLimits()
+    
     #test = CoinUtils.GetHistoricalData("BTCUSDT", "1h", "2024-10-14")
+    #test2 = CoinUtils.GetHistoricalData("MINAXUSDT", "1h", "2024-10-14")
     
     #DatasetHelper.UpdateAllEventsCoinData()
     #DatasetHelper.UpdateCoinsHistoricalData(Globals.coinHistoricalDataByInterval)
+    
+    DatasetHelper.ConvertAllToConversationalStyle()
     
     #fineTuner = Finetuner(dataset)
 

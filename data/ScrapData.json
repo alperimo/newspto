@@ -3,7 +3,9 @@
     "CurrentPage": 1576,
     ".CurrentPage": 1605,
     "PagesToScrape": 500,
-
-    "CoinUpdateCurrentPage": 1,
-    "CoinUpdatePagesToProcess": 5
+    "CoinUpdateCurrentPage": 1000,
+    "CoinUpdatePagesToProcess": 82,
+    "ConversationalStyleCurrentPage": 1,
+    "ConversationalStylePagesToProcess": 1,
+    "ConcatCurrentPage": 1
 }

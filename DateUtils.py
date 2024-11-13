@@ -1,16 +1,44 @@
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from Enums import DateType
+import Constants
 
 MONTHS = {
-    "Jan": ("01", 31), "Feb": ("02", 28), "Mar": ("03", 31), "March": ("03", 31),
-    "Apr": ("04", 30), "April": ("04", 30), "May": ("05", 31), "Jun": ("06", 30),
-    "June": ("06", 30), "Jul": ("07", 31), "Aug": ("08", 31), "Sep": ("09", 30),
-    "Oct": ("10", 31), "Nov": ("11", 30), "Dec": ("12", 31)
+    "Jan": ("01", 31), "January": ("01", 31),
+    "Feb": ("02", 28), "February": ("02", 28),
+    "Mar": ("03", 31), "March": ("03", 31),
+    "Apr": ("04", 30), "April": ("04", 30), "May": ("05", 31), 
+    "Jun": ("06", 30), "June": ("06", 30), 
+    "Jul": ("07", 31), "July": ("07", 31),
+    "Aug": ("08", 31), "August": ("08", 31),
+    "Sep": ("09", 30), "September": ("09", 30),
+    "Oct": ("10", 31), "October": ("10", 31),
+    "Nov": ("11", 30), "November": ("11", 30), 
+    "Dec": ("12", 31), "December": ("12", 31)
 }
 
-MONTH_PATTERN = r"(Jan|Feb|Mar|March|Apr|April|May|Jun|June|Jul|Aug|Sep|Oct|Nov|Dec)"
+MONTH_PATTERN = r"(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)"
+
+@staticmethod
+def CalculateDateFromInterval(base_date: datetime, interval: str) -> str:
+    """
+        Example interval: b1m, b2w, b3d, a1m, a1w, a3d, d, a1w, ...
+    """
+    
+    if interval == "d":
+        return base_date.strftime(Constants.UTC_FORMAT)
+    
+    try:
+        multiplier = int(interval[1:-1])
+        unit = interval[-1]
+        
+        days = {'m': 30, 'w': 7, 'd': 1}.get(unit, 1)
+        sign = 1 if interval[0] == 'a' else -1
+        
+        return (base_date + timedelta(days = sign * days * multiplier)).strftime(Constants.UTC_FORMAT)
+    except:
+        return base_date.strftime(Constants.UTC_FORMAT)
 
 @staticmethod
 def GetDateType(string: str) -> tuple[DateType, re.Match] | None:
@@ -62,6 +90,8 @@ def GetCorrectFormattedDate(string: str) -> str | tuple[str, str] | None:
             
             if endMonth < startMonth:
                 startYear = int(endYear) - 1
+            else:
+                startYear = endYear
             
             return f"{startYear}-{startMonth}-{startDay}", f"{endYear}-{endMonth}-{endDay}"
         
