@@ -2,7 +2,9 @@ from Enums import DateType
 
 DATA_PATH = "data"
 SCRAP_OUTPUTS_PATH = "data/scrap-outputs"
+UPCOMING_EVENTS_PATH = SCRAP_OUTPUTS_PATH + '/upcoming-events'
 CMC_DATASET_PATH = SCRAP_OUTPUTS_PATH + '/{}_{}_cmc_coin_pastevents.json'
+CMC_DATASET_UPCOMING_PATH = UPCOMING_EVENTS_PATH + '/cmc_coin_upcomingevents.json'
 
 EVENT_DATE_INTERVALS = {
     DateType.EXACT: ['b1m', 'b2w', 'b1w', 'b3d', 'b2d', 'b1d', 'd', 'a1d', 'a2d', 'a3d', 'a4d', 

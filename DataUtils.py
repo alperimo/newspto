@@ -32,7 +32,7 @@ def LoadScrapData():
 
 @staticmethod
 def Load():
-    LoadEnv()
+    #LoadEnv()
     LoadTopCoinNames()
     LoadScrapData()
     

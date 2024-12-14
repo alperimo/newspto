@@ -22,6 +22,8 @@ class CMCEvent:
             
     """
     date: str = ""
+    addedDate: str = ""
+    updatedDate: str = ""
     
     title: str = ""
     description: str = ""

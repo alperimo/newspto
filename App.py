@@ -9,7 +9,28 @@ import datetime
 import Constants, Globals, DataUtils, DateUtils
 import CoinUtils
 
-def ScrapEvents():
+def ScrapUpcomingEvents():
+    scrap = Scrap()
+    
+    currentPage: int = int(Globals.scrapData["CurrentPage"])
+    dateRange: str = Globals.scrapData["DateRange"]
+    scrapedPageCount: int = 0
+    
+    while scrapedPageCount < Globals.scrapData["PagesToScrape"]:
+        events = scrap.RetrieveEvents(route = "en/", dateRange = dateRange, coins = [""], page = currentPage)
+        if events is None:
+            print(f"Failed to retrieve events for the page {currentPage}.")
+            break
+        
+        DatasetHelper.AddUpcomingEvents(events, Constants.CMC_DATASET_UPCOMING_PATH)
+
+        scrapedPageCount += 1
+        currentPage += 1
+        
+        Globals.scrapData["CurrentPage"] = currentPage
+        DataUtils.SaveScrapData()
+        
+def ScrapPastEvents():
     scrap = Scrap()
     
     currentPage: int = int(Globals.scrapData["CurrentPage"])
@@ -42,9 +63,8 @@ def TestWeightLimits():
 
 def main():
     DataUtils.Load()
-    #ScrapEvents()
-    
-    TestWeightLimits()
+    #ScrapPastEvents()
+    ScrapUpcomingEvents()
     
     #test = CoinUtils.GetHistoricalData("BTCUSDT", "1h", "2024-10-14")
     #test2 = CoinUtils.GetHistoricalData("MINAXUSDT", "1h", "2024-10-14")
@@ -52,7 +72,7 @@ def main():
     #DatasetHelper.UpdateAllEventsCoinData()
     #DatasetHelper.UpdateCoinsHistoricalData(Globals.coinHistoricalDataByInterval)
     
-    DatasetHelper.ConvertAllToConversationalStyle()
+    #DatasetHelper.ConvertAllToConversationalStyle()
     
     #fineTuner = Finetuner(dataset)
 

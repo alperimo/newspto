@@ -39,6 +39,15 @@ def CalculateDateFromInterval(base_date: datetime, interval: str) -> str:
         return (base_date + timedelta(days = sign * days * multiplier)).strftime(Constants.UTC_FORMAT)
     except:
         return base_date.strftime(Constants.UTC_FORMAT)
+    
+@staticmethod
+def CalculateRelativeDaysBetweenDates(date1: str, date2: str) -> int:
+    """
+    Returns the number of days between two dates, also negative if date1 is before date2
+    """
+    date1 = datetime.strptime(date1, Constants.UTC_FORMAT)
+    date2 = datetime.strptime(date2, Constants.UTC_FORMAT)
+    return (date1 - date2).days
 
 @staticmethod
 def GetDateType(string: str) -> tuple[DateType, re.Match] | None:
